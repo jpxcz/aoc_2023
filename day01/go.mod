@@ -1,3 +1,3 @@
-module advent_d1
+module day01 
 
 go 1.21.1
