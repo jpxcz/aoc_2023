@@ -45,14 +45,19 @@ func main() {
 	fileScanner := bufio.NewScanner(readFile)
 	fileScanner.Split(bufio.ScanLines)
 
-	var total int64 = 0
+	var totalPartOne int64 = 0
+	var totalPartTwo int64 = 0
 	for fileScanner.Scan() {
 		t := fileScanner.Text()
-		v := scanLinePartOne(t)
-		total = total + v
+		v1 := scanLinePartOne(t)
+		totalPartOne = totalPartOne + v1
+
+		v2 := scanLinePartTwo(t)
+		totalPartTwo = totalPartTwo + v2
 	}
 
-	fmt.Printf("total=%d", total)
+	fmt.Printf("total part one=%d\n", totalPartOne)
+	fmt.Printf("total part two=%d\n", totalPartTwo)
 }
 
 func cleanValue(l string, old string) int64 {
@@ -110,4 +115,27 @@ func scanLinePartOne(l string) int64 {
 
 	id := gameId(substrings[0])
 	return id
+}
+
+func scanLinePartTwo(l string) int64 {
+	substrings := strings.Split(l, ":")
+	bags := strings.Split(substrings[1], ";")
+	minCombination := NewCombination()
+	for _, bag := range bags {
+		parsedBag := getCombination(bag)
+		if parsedBag.Blue > minCombination.Blue {
+			minCombination.Blue = parsedBag.Blue
+		}
+
+		if parsedBag.Green > minCombination.Green {
+			minCombination.Green = parsedBag.Green
+		}
+
+		if parsedBag.Red > minCombination.Red {
+			minCombination.Red = parsedBag.Red
+		}
+	}
+
+	value := minCombination.Blue * minCombination.Green * minCombination.Red
+	return value
 }
