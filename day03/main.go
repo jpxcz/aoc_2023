@@ -31,6 +31,7 @@ func main() {
 	}
 
 	partOne(text)
+	partTwo(text)
 }
 
 type NumberCoordinates struct {
@@ -99,6 +100,10 @@ func isSymbol(r rune) bool {
 	return true
 }
 
+func isAsterik(r rune) bool {
+	return r == '*'
+}
+
 func findAdjacentNumbers(x, y int, numbers []*NumberCoordinates) int {
 	adjacents := 0
 	for _, n := range numbers {
@@ -107,7 +112,6 @@ func findAdjacentNumbers(x, y int, numbers []*NumberCoordinates) int {
 		}
 
 		if n.x >= x-1 && n.x <= x+1 && ((n.y >= y-1 && n.y <= y+1) || (n.yEnd >= y-1 && n.yEnd <= y+1)) {
-			fmt.Printf("value=%d\n", n.value)
 			adjacents = adjacents + n.value
 			n.parsed = true
 		}
@@ -132,6 +136,46 @@ func findAdjacentSymbolsSumatory(text TextScan, numbers []*NumberCoordinates) in
 func partOne(text TextScan) {
 	numbers := getNumberCoordinates(text)
 	total := findAdjacentSymbolsSumatory(text, numbers)
-	fmt.Printf("total=%d\n", total)
+	fmt.Printf("total part one=%d\n", total)
+}
 
+func findAdjacentGearNumbers(x, y int, numbers []*NumberCoordinates) int {
+	firstNumber := 0
+	secondNumber := 0
+	for _, n := range numbers {
+		if n.parsed {
+			continue
+		}
+
+		if n.x >= x-1 && n.x <= x+1 && ((n.y >= y-1 && n.y <= y+1) || (n.yEnd >= y-1 && n.yEnd <= y+1)) {
+			if firstNumber == 0 {
+				firstNumber = n.value
+			} else {
+				secondNumber = n.value
+			}
+		}
+	}
+
+	return firstNumber * secondNumber
+
+}
+
+func findGearsSumatory(text TextScan, numbers []*NumberCoordinates) int {
+	total := 0
+
+	for lIndex, line := range text {
+		for rIndex, r := range line {
+			if isAsterik(r) {
+				total = total + findAdjacentGearNumbers(lIndex, rIndex, numbers)
+			}
+		}
+	}
+
+	return total
+}
+
+func partTwo(text TextScan) {
+	numbers := getNumberCoordinates(text)
+	total := findGearsSumatory(text, numbers)
+	fmt.Printf("total part two=%d\n", total)
 }
