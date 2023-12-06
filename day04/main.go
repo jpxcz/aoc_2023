@@ -32,6 +32,7 @@ func main() {
 	}
 
 	partOne(text)
+	partTwo(text)
 }
 
 type CardGame struct {
@@ -39,6 +40,8 @@ type CardGame struct {
 	hand           []int
 	winningNumbers map[int]bool
 }
+
+type ScartchCardsCopies map[int]int
 
 func NewCardGame(id int, hand []int, winningNumbers map[int]bool) *CardGame {
 	return &CardGame{
@@ -63,6 +66,25 @@ func (c *CardGame) points() int {
 	return points
 }
 
+func (c *CardGame) matchingCards(copiesCards ScartchCardsCopies) ScartchCardsCopies {
+	matches := 0
+
+	for _, n := range c.hand {
+		if _, ok := c.winningNumbers[n]; ok {
+			matches += 1
+		}
+	}
+
+	copiesCards[c.id] = copiesCards[c.id] + 1
+	if matches > 0 {
+		for i := c.id + 1; i <= c.id+matches; i++ {
+			copiesCards[i] = copiesCards[i] + copiesCards[c.id]
+		}
+	}
+
+	return copiesCards
+}
+
 func partOne(text TextScan) {
 	total := 0
 	for _, line := range text {
@@ -73,10 +95,29 @@ func partOne(text TextScan) {
 		winning := getWinningNumbers(hands[1])
 		card := NewCardGame(id, hand, winning)
 		total += card.points()
-
 	}
 
 	fmt.Printf("total part one=%d\n", total)
+}
+
+func partTwo(text TextScan) {
+	copies := make(ScartchCardsCopies, 0)
+	for _, line := range text {
+		cardHands := strings.Split(line, ":")
+		id := getCardId(cardHands[0])
+		hands := strings.Split(cardHands[1], "|")
+		hand := getCardHand(hands[0])
+		winning := getWinningNumbers(hands[1])
+		card := NewCardGame(id, hand, winning)
+		copies = card.matchingCards(copies)
+	}
+
+	total := 0
+	for _, v := range copies {
+		total += v
+	}
+
+	fmt.Printf("total part two=%d\n", total)
 }
 
 func sanitizeValue(s string, removeText string) int {
