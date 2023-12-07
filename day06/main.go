@@ -19,7 +19,8 @@ func main() {
 	}
 
 	lines := strings.Split(string(content), "\n")
-	partOne(lines)
+	// partOne(lines)
+	partTwo(lines)
 
 }
 
@@ -41,6 +42,27 @@ func partOne(text []string) {
 	fmt.Printf("total=%d\n", beats)
 }
 
+func partTwo(text []string) {
+	time := toSingleInteger(strings.Fields(text[0])[1:])
+	distance := toSingleInteger(strings.Fields(text[1])[1:])
+
+	wons := countPassingOptions(time, distance)
+
+	fmt.Printf("total=%d\n", wons)
+}
+
+func toSingleInteger(values []string) int {
+	v := strings.Join(values, "")
+
+	n, err := strconv.Atoi(v)
+	if err != nil {
+		panic(err)
+	}
+
+	return n
+
+}
+
 func toIntegers(values []string) []int {
 	numbers := make([]int, 0)
 	for _, v := range values {
@@ -58,7 +80,7 @@ func toIntegers(values []string) []int {
 func countPassingOptions(time int, distance int) int {
 	count := 0
 	for i := 1; i <= time; i++ {
-		if (i * (time-i)) > distance {
+		if (i * (time - i)) > distance {
 			count += 1
 		}
 	}
