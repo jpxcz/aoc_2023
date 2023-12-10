@@ -22,7 +22,7 @@ var cardStrenght = map[byte]int{
 	'A': 14,
 	'K': 13,
 	'Q': 12,
-	'J': 11,
+	'J': 0,
 	'T': 10,
 	'9': 9,
 	'8': 8,
@@ -56,7 +56,7 @@ func main() {
 		text = append(text, t)
 	}
 
-	partOne(text)
+	partTwo(text)
 }
 
 // type ScartchCardsCopies map[int]int
@@ -75,7 +75,7 @@ func NewCamelHand(values string, handType int, bid int) *CamelHand {
 	}
 }
 
-func partOne(text []string) {
+func partTwo(text []string) {
 	cards := make([]*CamelHand, 0)
 	for _, line := range text {
 		values := strings.Split(line, " ")
@@ -103,7 +103,7 @@ func partOne(text []string) {
 		indexLowest = -1
 	}
 
-	fmt.Printf("total part one=%d\n", total)
+	fmt.Printf("total part two=%d\n", total)
 }
 
 func getNumberValue(s string) int {
@@ -121,6 +121,23 @@ func getHandValue(s string) int {
 	for _, r := range s {
 		m[r] += 1
 	}
+
+	jokers := 0
+	if v, ok := m['J']; ok {
+		jokers = v
+		delete(m, 'J')
+	}
+
+	highestCard := 'J'
+	highestValue := 0
+	for k, v := range m {
+		if v > highestValue {
+			highestCard = k
+			highestValue = v
+		}
+	}
+
+	m[highestCard] = m[highestCard] + jokers
 
 	if len(m) == 1 {
 		return FIVE_OF_A_KIND
@@ -141,7 +158,6 @@ func getHandValue(s string) int {
 				return THREE_OF_A_KIND
 			}
 		}
-
 		return TWO_PAIRS
 	}
 
