@@ -85,7 +85,7 @@ func partOne(directions string, lines string) {
 func partTwo(directions string, lines string) {
 	text := strings.Split(lines, "\n")
 	var initialNodes []*Node
-	steps := 0
+	var cycles [][]int
 
 	for _, t := range text {
 		nodeName := t[:3]
@@ -106,38 +106,75 @@ func partTwo(directions string, lines string) {
 		parentNode.AddRight(childRightNode)
 	}
 
-	for true {
-		initialNodes, steps = walkLoopNodes(initialNodes, directions, steps)
-		if steps%100000000 == 0 {
-			fmt.Printf("steps: %d\n", steps)
+	for _, node := range initialNodes {
+		steps := 0
+		initialZFoundSteps := 0
+		var cycle []int
+		for true {
+			zFound := false
+			for steps == 0 || !zFound {
+				node, steps, zFound = walkLoopNodes(node, directions, steps)
+			}
+			cycle = append(cycle, steps)
+			if initialZFoundSteps == 0 {
+				initialZFoundSteps = steps
+				steps = 0
+			} else if steps == initialZFoundSteps {
+				break
+			}
 		}
-		if initialNodes == nil {
-			break
-		}
+
+		cycles = append(cycles, cycle)
 	}
 
-	fmt.Printf("part2 steps=%d\n", steps)
+	var nums []int
+	for _, c := range cycles {
+		nums = append(nums, c[0])
+	}
+
+	lcm := 1
+
+	for _, n := range nums {
+		lcm = LCM(lcm, n)
+	}
+
+	fmt.Printf("part2 steps=%+v\n", lcm)
 }
 
-func walkLoopNodes(nodes []*Node, rute string, step int) ([]*Node, int) {
+func walkLoopNodes(node *Node, rute string, step int) (*Node, int, bool) {
 	direction := getNewDirection(rute, step)
-	newNodes := make([]*Node, len(nodes))
-
-	for i, node := range nodes {
-		if direction == 'L' {
-			newNodes[i] = node.Left
-		} else {
-			newNodes[i] = node.Right
+	if direction == 'L' {
+		if node.Left.Value[2] == 'Z' {
+			return node.Left, step + 1, true
 		}
+		return node.Left, step + 1, false
+	} else {
+		if node.Right.Value[2] == 'Z' {
+			return node.Left, step + 1, true
+		}
+		return node.Right, step + 1, false
+	}
+}
+
+// greatest common divisor (GCD) via Euclidean algorithm
+func GCD(a, b int) int {
+	for b != 0 {
+		t := b
+		b = a % b
+		a = t
+	}
+	return a
+}
+
+// find Least Common Multiple (LCM) via GCD
+func LCM(a, b int, integers ...int) int {
+	result := a * b / GCD(a, b)
+
+	for i := 0; i < len(integers); i++ {
+		result = LCM(result, integers[i])
 	}
 
-	for _, node := range newNodes {
-		if node.Value[2] != 'Z' {
-			return newNodes, step + 1
-		}
-	}
-
-	return nil, step + 1
+	return result
 }
 
 func walkLoop(node *Node, rute string, step int) (*Node, int) {
